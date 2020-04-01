@@ -83,37 +83,12 @@ def tobs():
 
     return jsonify(tobs_list)
 
-@app.route("/api/v1.0/start/<string:start>")
+@app.route("/api/v1.0/start/<start>")
 def start_date_varaible(start):
     session = Session(engine)
-    # temps = session.query(Measurement.date, Measurement.tobs).all()
-    #     filter(Measurement.date == start).all()
-    temps = engine.execute('SELECT date, tobs FROM measurement').fetchall()
+    temps = session.query(Measurement.date, Measurement.tobs).\
+        filter(Measurement.date >= start).all()
     session.close()
-
-#DATAFRAME VERSION
-
-    # df = pd.DataFrame(temps)
-    # df[0] = df[0].astype(str)
-    # df = df.loc[df[0] == start]
-    # min_daily_temp = df[1].min()
-
-    # df = pd.DataFrame(temps)
-    # df[0] = df[0].astype(str)
-    # df = df.loc[df[0] == start]
-    # max_daily_temp = df[1].max()
-
-    # df = pd.DataFrame(temps)
-    # df[0] = df[0].astype(str)
-    # df = df.loc[df[0] == start]
-    # mean_daily_temp = df[1].mean()
-
-    # temp_dict = {
-    #     "Min Temp": min_daily_temp,
-    #     "Max Temp": max_daily_temp,
-    #     "Avg Temp": mean_daily_temp
-    # }
-#---------------------------------------------
 
     temps_list = []
 
