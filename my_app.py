@@ -2,7 +2,6 @@ from flask import Flask, jsonify
 
 import numpy as np
 import datetime as dt
-import pandas as pd
 
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
@@ -28,8 +27,8 @@ def home():
     f"/api/v1.0/stations<br/>"
     f"/api/v1.0/tobs<br/>"
     f"/api/v1.0/start/month-day-year<br/>"
-    f"NOTE: Dates have to follow this format: '2010-12-25' (Year, month, day)"
-    f"/api/v1.0/start-date/end-date<br/>"
+    f"/api/v1.0/startend/start-date/end-date<br/>"
+    f"NOTE: Dates have to follow this format: '2010-12-25' (YYYY, MM, DD)<br/>"
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -86,23 +85,22 @@ def tobs():
 @app.route("/api/v1.0/start/<start>")
 def start_date_varaible(start):
     session = Session(engine)
-    temps = session.query(Measurement.date, Measurement.tobs).\
+    temps = session.query(func.max(Measurement.tobs), func.min(Measurement.tobs), func.avg(Measurement.tobs)).\
         filter(Measurement.date >= start).all()
     session.close()
 
-    temps_list = []
 
-    for date, tobs in temps:
-        temps_dict = {}
-        temps_dict["date"] = date
-        temps_dict["tobs"] = tobs
-        temps_list.append(temps_dict)
+    return jsonify(temps)
 
-    return jsonify(temps_list)
+@app.route("/api/v1.0/startend/<start>/<end>")
+def start_end_date_varaible(start, end):
+    session = Session(engine)
+    temps_2 = session.query(func.max(Measurement.tobs), func.min(Measurement.tobs), func.avg(Measurement.tobs)).\
+        filter(Measurement.date >= start).\
+        filter(Measurement.date <= end).all()
+    session.close()
 
-
-#@app.route("/api/v1.0/<start>/<end>")
-
+    return jsonify(temps_2)
 
 if __name__ == "__main__":
     app.run(debug=True)
